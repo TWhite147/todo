@@ -26,7 +26,7 @@ const TaskList = () => {
                 dispatch(updateTask({ ...task, completed: !task.completed }))
               }
             >
-              {task.title}
+              📋 {task.title}
             </span>
             <button onClick={() => dispatch(deleteTask(task._id))}>
               Delete
