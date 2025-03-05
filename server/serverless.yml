@@ -1,0 +1,25 @@
+service: todo-app
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    TABLE_NAME: TasksTable
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - http:
+          path: tasks
+          method: get
+      - http:
+          path: tasks
+          method: post
+      - http:
+          path: tasks/{id}
+          method: put
+      - http:
+          path: tasks/{id}
+          method: delete
