@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "nodemon index.ts"
+  },
   "dependencies": {
     "@types/node": "^22.13.9",
     "aws-sdk": "^2.1692.0",

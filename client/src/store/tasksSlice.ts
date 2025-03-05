@@ -1,29 +1,64 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+
+const API_URL = "http://localhost:3000/tasks";
 
 interface Task {
-  id: string;
+  _id: string;
   title: string;
   completed: boolean;
 }
 
-const initialState: Task[] = [];
+export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
+  const response = await axios.get(API_URL);
+  return response.data;
+});
 
-const tasksSlice = createSlice({
+export const addTask = createAsyncThunk(
+  "tasks/addTask",
+  async (title: string) => {
+    const response = await axios.post(API_URL, { title, completed: false });
+    return response.data;
+  }
+);
+
+export const updateTask = createAsyncThunk(
+  "tasks/updateTask",
+  async (task: Task) => {
+    const response = await axios.put(`${API_URL}/${task._id}`, task);
+    return response.data;
+  }
+);
+
+export const deleteTask = createAsyncThunk(
+  "tasks/deleteTask",
+  async (taskId: string) => {
+    await axios.delete(`${API_URL}/${taskId}`);
+    return taskId;
+  }
+);
+
+const taskSlice = createSlice({
   name: "tasks",
-  initialState,
-  reducers: {
-    addTask: (state, action: PayloadAction<Task>) => {
-      state.push(action.payload);
-    },
-    removeTask: (state, action: PayloadAction<string>) => {
-      return state.filter((task) => task.id !== action.payload);
-    },
-    updateTask: (state, action: PayloadAction<Task>) => {
-      const index = state.findIndex((task) => task.id === action.payload.id);
-      if (index !== -1) state[index] = action.payload;
-    },
+  initialState: { tasks: [] as Task[], loading: false },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
+        state.tasks = action.payload;
+      })
+      .addCase(addTask.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.tasks.push(action.payload);
+      })
+      .addCase(updateTask.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.tasks = state.tasks.map((task) =>
+          task._id === action.payload._id ? action.payload : task
+        );
+      })
+      .addCase(deleteTask.fulfilled, (state, action: PayloadAction<string>) => {
+        state.tasks = state.tasks.filter((task) => task._id !== action.payload);
+      });
   },
 });
 
-export const { addTask, removeTask, updateTask } = tasksSlice.actions;
-export default tasksSlice.reducer;
+export default taskSlice.reducer;

@@ -1,47 +1,40 @@
 import { useEffect } from "react";
-import { FlatList, Button, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
-import { getTasks, deleteTask, updateTask } from "../api";
-import {
-  addTask,
-  removeTask,
-  updateTask as updateTaskAction,
-} from "../store/tasksSlice";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch } from "../store/store";
+import { fetchTasks, deleteTask, updateTask } from "../store/tasksSlice";
 
 const TaskList = () => {
-  const dispatch = useDispatch();
-  const tasks = useSelector((state: RootState) => state.tasks);
+  const dispatch = useAppDispatch();
+  const tasks = useSelector((state: RootState) => state.tasks.tasks);
 
   useEffect(() => {
-    getTasks().then((data) => data.forEach((task) => dispatch(addTask(task))));
+    dispatch(fetchTasks());
   }, [dispatch]);
 
   return (
-    <FlatList
-      data={tasks}
-      renderItem={({ item }) => (
-        <View>
-          <Text>{item.title}</Text>
-          <Button
-            title="Complete"
-            onPress={() => {
-              updateTask(item.id, !item.completed);
-              dispatch(
-                updateTaskAction({ ...item, completed: !item.completed })
-              );
-            }}
-          />
-          <Button
-            title="Delete"
-            onPress={() => {
-              deleteTask(item.id);
-              dispatch(removeTask(item.id));
-            }}
-          />
-        </View>
-      )}
-    />
+    <div>
+      <h2>Task List</h2>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task._id} style={{ listStyle: "none" }}>
+            <span
+              style={{
+                textDecoration: task.completed ? "line-through" : "none",
+                cursor: "pointer",
+              }}
+              onClick={() =>
+                dispatch(updateTask({ ...task, completed: !task.completed }))
+              }
+            >
+              {task.title}
+            </span>
+            <button onClick={() => dispatch(deleteTask(task._id))}>
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
