@@ -1,36 +1,34 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Text, TouchableOpacity } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import { useState } from "react";
+import { View, TextInput, Button, Text } from "react-native";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/authSlice";
 
-const LoginScreen = ({ navigation }: any) => {
+const SignupScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     if (!email || !password) {
       setError("Please fill in both fields.");
       return;
     }
 
     try {
-      const response = await axios.post("http://10.0.2.2:3000/auth/login", {
-        // const response = await axios.post("http://localhost:3000/auth/login", {
+      const response = await axios.post("http://10.0.2.2:3000/auth/register", {
+        // const response = await axios.post("http://localhost:3000/auth/register", {
         email,
         password,
       });
 
-      if (response.status === 200) {
-        await SecureStore.setItemAsync("token", response.data.token);
+      if (response.status === 201) {
         dispatch(login(response.data.token));
         navigation.navigate("Todos");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Error logging in");
+      setError(err.response?.data?.message || "Error signing up");
     }
   };
 
@@ -60,14 +58,9 @@ const LoginScreen = ({ navigation }: any) => {
         onChangeText={setPassword}
       />
       {error && <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>}
-      <Button title="Log In" onPress={handleLogin} />
-      <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-        <Text style={{ color: "blue", marginTop: 10 }}>
-          Don't have an account? Sign Up
-        </Text>
-      </TouchableOpacity>
+      <Button title="Sign Up" onPress={handleSignup} />
     </View>
   );
 };
 
-export default LoginScreen;
+export default SignupScreen;

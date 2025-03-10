@@ -1,78 +1,43 @@
-import React, {
-  createContext,
-  useState,
-  ReactNode,
-  useContext,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import * as SecureStore from "expo-secure-store";
-import axios from "axios";
-import { Platform } from "react-native";
+import { login, logout } from "@/store/authSlice";
 
 interface AuthContextType {
   user: any;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (token: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
-
-  const getToken = async () => {
-    if (Platform.OS === "web") {
-      return localStorage.getItem("token");
-    }
-    return SecureStore.getItemAsync("token");
-  };
-
-  const setToken = async (token: string) => {
-    if (Platform.OS === "web") {
-      localStorage.setItem("token", token);
-    } else {
-      await SecureStore.setItemAsync("token", token);
-    }
-  };
-
-  const removeToken = async () => {
-    if (Platform.OS === "web") {
-      localStorage.removeItem("token");
-    } else {
-      await SecureStore.deleteItemAsync("token");
-    }
-  };
+export const AuthProvider = ({ children }: any) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state: any) => state.auth.user);
 
   useEffect(() => {
-    const checkForToken = async () => {
-      const token = await getToken();
+    const checkAuth = async () => {
+      const token = await SecureStore.getItemAsync("token");
       if (token) {
-        const { data } = await axios.get("http://localhost:3000/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(data.user);
+        dispatch(login(token));
       }
     };
-    checkForToken();
-  }, []);
+    checkAuth();
+  }, [dispatch]);
 
-  const login = async (email: string, password: string) => {
-    const { data } = await axios.post("http://localhost:3000/auth/login", {
-      email,
-      password,
-    });
-
-    await setToken(data.token);
-    setUser(data.user);
+  const loginUser = (token: string) => {
+    dispatch(login(token));
   };
 
-  const logout = async () => {
-    await removeToken();
-    setUser(null);
+  const logoutUser = () => {
+    dispatch(logout());
+    SecureStore.deleteItemAsync("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, login: loginUser, logout: logoutUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
