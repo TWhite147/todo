@@ -1,11 +1,16 @@
-import { Stack } from "expo-router";
-import { Provider } from "react-redux";
-import { store } from "../store/store";
+import React from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthProvider } from "./(context)/AuthContext";
+import RootNavigator from "./(navigation)/RootNavigator";
 
-export default function App() {
+const App = () => {
   return (
-    <Provider store={store}>
-      <Stack />
-    </Provider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
-}
+};
+
+export default App;

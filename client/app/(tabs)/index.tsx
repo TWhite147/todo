@@ -1,63 +1,74 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import { useSelector } from "react-redux";
-import { RootState, useAppDispatch } from "../../store/store";
-import { fetchTasks, deleteTask, updateTask } from "../../store/taskSlice";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { View, TextInput, Button, Text, FlatList } from "react-native";
+import axios from "axios";
+import { useAuth } from "../(context)/AuthContext";
+import * as SecureStore from "expo-secure-store";
 
-export default function TaskListScreen() {
-  const dispatch = useAppDispatch();
-  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+const TodoScreen = () => {
+  const [todoText, setTodoText] = useState("");
+  const [todos, setTodos] = useState<any[]>([]);
+  const { logout } = useAuth();
 
   useEffect(() => {
-    dispatch(fetchTasks());
-  }, [dispatch]);
+    const fetchTodos = async () => {
+      const { data } = await axios.get("http://localhost:3000/api/todos", {
+        headers: {
+          Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+        },
+      });
+      setTodos(data);
+    };
+
+    fetchTodos();
+  }, []);
+
+  const addTodo = async () => {
+    const { data } = await axios.post(
+      "http://localhost:3000/api/todos",
+      { text: todoText },
+      {
+        headers: {
+          Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+        },
+      }
+    );
+    setTodos([...todos, data]);
+    setTodoText("");
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Task List</Text>
+    <View style={{ padding: 20 }}>
+      <TextInput
+        style={{
+          height: 40,
+          borderColor: "gray",
+          borderWidth: 1,
+          marginBottom: 10,
+        }}
+        placeholder="New Todo"
+        value={todoText}
+        onChangeText={setTodoText}
+      />
+      <Button title="Add Todo" onPress={addTodo} />
+      <Button title="Logout" onPress={handleLogout} />
       <FlatList
-        data={tasks}
-        keyExtractor={(task) => task._id}
+        data={todos}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={styles.taskItem}>
-            <TouchableOpacity
-              onPress={() =>
-                dispatch(updateTask({ ...item, completed: !item.completed }))
-              }
-            >
-              <Text
-                style={item.completed ? styles.completedText : styles.taskText}
-              >
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => dispatch(deleteTask(item._id))}>
-              <Text style={styles.deleteButton}>X</Text>
-            </TouchableOpacity>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text>{item.text}</Text>
+            <Text>{item.completed ? "Completed" : "Pending"}</Text>
           </View>
         )}
       />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  taskItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  taskText: { fontSize: 18 },
-  completedText: { fontSize: 18, textDecorationLine: "line-through" },
-  deleteButton: { color: "red", fontSize: 18 },
-});
+export default TodoScreen;
