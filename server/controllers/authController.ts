@@ -1,10 +1,13 @@
-// authController.ts
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+
+interface CustomRequest extends Request {
+  userId?: string;
+}
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -35,6 +38,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       });
       res.json({ token, user: { id: user._id, email: user.email } });
     } else res.status(400).json({ message: "Invalid credentials" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const me = async (req: CustomRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user) res.json({ id: user._id, email: user.email });
+    else res.status(404).json({ message: "User not found" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

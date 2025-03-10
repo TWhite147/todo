@@ -11,7 +11,7 @@ const TodoScreen = () => {
 
   useEffect(() => {
     const fetchTodos = async () => {
-      const { data } = await axios.get("http://localhost:3000/api/todos", {
+      const { data } = await axios.get("http://localhost:3000/todos", {
         headers: {
           Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
         },
@@ -24,7 +24,7 @@ const TodoScreen = () => {
 
   const addTodo = async () => {
     const { data } = await axios.post(
-      "http://localhost:3000/api/todos",
+      "http://localhost:3000/todos",
       { text: todoText },
       {
         headers: {

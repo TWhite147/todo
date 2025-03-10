@@ -1,5 +1,5 @@
 import { Express, Router } from "express";
-import taskRouter from "./todoRouter";
+import todoRoutes from "./todoRouter";
 import authRoutes from "./authRoutes";
 
 const rootRouter = Router();
@@ -8,7 +8,7 @@ rootRouter.all("*", (req, res) => {
 });
 
 const setRouting = (app: Express) => {
-  app.use("/tasks", taskRouter);
+  app.use("/todos", todoRoutes);
   app.use("/auth", authRoutes);
   app.use(rootRouter);
 };

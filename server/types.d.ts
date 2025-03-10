@@ -1,5 +1,3 @@
-declare namespace Express {
-  export interface Request {
-    userId?: string;
-  }
+export interface CustomRequest extends Request {
+  userId?: string;
 }
