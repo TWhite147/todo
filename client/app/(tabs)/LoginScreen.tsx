@@ -19,7 +19,7 @@ const LoginScreen = ({ navigation }: any) => {
 
     try {
       const response = await axios.post("http://10.0.2.2:3000/auth/login", {
-        // const response = await axios.post("http://localhost:3000/auth/login", {
+        // const response = await axios.post("http://localhost:3000/auth/login", { FOR USE IF TESTING IN BROWSER
         email,
         password,
       });

@@ -18,7 +18,7 @@ const SignupScreen = ({ navigation }: any) => {
 
     try {
       const response = await axios.post("http://10.0.2.2:3000/auth/register", {
-        // const response = await axios.post("http://localhost:3000/auth/register", {
+        // const response = await axios.post("http://localhost:3000/auth/register", { FOR USE IF TESTING IN BROWSER
         email,
         password,
       });
