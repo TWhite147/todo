@@ -31,14 +31,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="about"
+        name="AddTaskScreen"
         options={{
-          title: "About",
+          title: "Add Tasks",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={
-                focused ? "information-circle" : "information-circle-outline"
-              }
+              name={focused ? "menu-sharp" : "menu-outline"}
               color={color}
               size={24}
             />

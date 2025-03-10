@@ -1,30 +1,63 @@
-import { Text, View, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch } from "../../store/store";
+import { fetchTasks, deleteTask, updateTask } from "../../store/taskSlice";
+import { useEffect } from "react";
 
-export default function Index() {
+export default function TaskListScreen() {
+  const dispatch = useAppDispatch();
+  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, [dispatch]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Home screen</Text>
-      <Link href="/about" style={styles.button}>
-        Go to About screen
-      </Link>
+      <Text style={styles.header}>Task List</Text>
+      <FlatList
+        data={tasks}
+        keyExtractor={(task) => task._id}
+        renderItem={({ item }) => (
+          <View style={styles.taskItem}>
+            <TouchableOpacity
+              onPress={() =>
+                dispatch(updateTask({ ...item, completed: !item.completed }))
+              }
+            >
+              <Text
+                style={item.completed ? styles.completedText : styles.taskText}
+              >
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => dispatch(deleteTask(item._id))}>
+              <Text style={styles.deleteButton}>X</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#25292e",
-    alignItems: "center",
-    justifyContent: "center",
+  container: { flex: 1, padding: 20 },
+  header: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
+  taskItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
-  text: {
-    color: "#fff",
-  },
-  button: {
-    fontSize: 20,
-    textDecorationLine: "underline",
-    color: "#fff",
-  },
+  taskText: { fontSize: 18 },
+  completedText: { fontSize: 18, textDecorationLine: "line-through" },
+  deleteButton: { color: "red", fontSize: 18 },
 });
